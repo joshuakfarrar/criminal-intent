@@ -1,9 +1,8 @@
 package me.sent1nel.criminalintent.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.text.format.DateFormat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,9 +16,6 @@ import butterknife.OnTextChanged;
 
 import java.text.ParseException;
 import java.util.Date;
-import java.util.Locale;
-
-import static java.text.DateFormat.MEDIUM;
 
 public class CrimeFragment extends Fragment {
 

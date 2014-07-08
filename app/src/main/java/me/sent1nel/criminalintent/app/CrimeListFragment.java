@@ -1,17 +1,27 @@
 package me.sent1nel.criminalintent.app;
 
-import android.app.Fragment;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.support.v4.app.ListFragment;
+import android.widget.ArrayAdapter;
 
-public class CrimeListFragment extends Fragment {
+import java.util.ArrayList;
+
+public class CrimeListFragment extends ListFragment {
+
+    private ArrayList<Crime> crimes;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.crime_list_fragment, container, false);
-        return rootView;
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        getActivity().setTitle(R.string.crimes_title);
+
+        crimes = CrimeLab.get(getActivity().getApplicationContext()).getCrimes();
+
+        ArrayAdapter<Crime> adapter = new ArrayAdapter<Crime>(getActivity(),
+                                                      android.R.layout.simple_list_item_1,
+                                                      crimes);
+
+        setListAdapter(adapter);
     }
 }
