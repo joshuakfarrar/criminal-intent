@@ -16,6 +16,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="me.sent1nel.criminalintent.app.CrimeListActivity"
+            android:label="@string/title_activity_crime_list" >
+        </activity>
     </application>
 
 </manifest>
