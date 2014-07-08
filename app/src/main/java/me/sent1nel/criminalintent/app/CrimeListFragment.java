@@ -43,6 +43,12 @@ public class CrimeListFragment extends ListFragment {
         startActivity(intent);
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((CrimeAdapter) getListAdapter()).notifyDataSetChanged();
+    }
+
     public class CrimeAdapter extends ArrayAdapter<Crime> {
 
         @InjectView(R.id.crime_list_item_titleTextView)
