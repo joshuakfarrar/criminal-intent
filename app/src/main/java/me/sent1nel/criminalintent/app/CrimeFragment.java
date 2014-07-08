@@ -1,7 +1,10 @@
 package me.sent1nel.criminalintent.app;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -9,10 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.TextView;
-import butterknife.ButterKnife;
-import butterknife.InjectView;
-import butterknife.OnCheckedChanged;
-import butterknife.OnTextChanged;
+import butterknife.*;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -21,11 +21,14 @@ import java.util.UUID;
 public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "crime_id";
+    private static final String DIALOG_DATE = "date";
+    private static final int REQUEST_DATE = 0;
+
 
     @InjectView(R.id.crime_title)
     TextView crimeTitle;
     @InjectView(R.id.crime_date)
-    Button crimeDate;
+    Button crimeDateButton;
     @InjectView(R.id.crime_solved)
     CheckBox crimeSolved;
 
@@ -57,18 +60,27 @@ public class CrimeFragment extends Fragment {
         ButterKnife.inject(this, rootView);
 
         crimeTitle.setText(crime.getTitle());
-        configureCrimeDateEditText();
+        updateDate();
         crimeSolved.setChecked(crime.isSolved());
 
         return rootView;
     }
 
-    private void configureCrimeDateEditText() {
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != Activity.RESULT_OK) return;
+        if (requestCode == REQUEST_DATE) {
+            Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
+            crime.setDate(date);
+            updateDate();
+        }
+    }
+
+    private void updateDate() {
         try {
-            crimeDate.setText(getPrettyDate(crime.getDate()));
-            crimeDate.setEnabled(false);
+            crimeDateButton.setText(getPrettyDate(crime.getDate()));
         } catch (ParseException e) {
-            crimeDate.setVisibility(View.GONE);
+            crimeDateButton.setVisibility(View.GONE);
         }
     }
 
@@ -85,5 +97,13 @@ public class CrimeFragment extends Fragment {
     @OnCheckedChanged(R.id.crime_solved)
     void onChecked(boolean checked) {
         crime.setSolved(checked);
+    }
+
+    @OnClick(R.id.crime_date)
+    void showDatePicker() {
+        FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
+        DatePickerFragment dialog = DatePickerFragment.newInstance(crime.getDate());
+        dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
+        dialog.show(fragmentManager, DIALOG_DATE);
     }
 }

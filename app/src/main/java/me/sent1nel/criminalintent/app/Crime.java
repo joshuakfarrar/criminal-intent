@@ -36,6 +36,10 @@ public class Crime {
         return date;
     }
 
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
     public boolean isSolved() {
         return solved;
     }
