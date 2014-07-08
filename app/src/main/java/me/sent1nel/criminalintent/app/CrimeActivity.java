@@ -11,8 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.os.Build;
 
-
-
 public class CrimeActivity extends Activity {
 
     @Override
@@ -25,7 +23,6 @@ public class CrimeActivity extends Activity {
                     .commit();
         }
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
