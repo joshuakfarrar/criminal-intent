@@ -31,15 +31,11 @@ public class Crime {
         return date;
     }
 
-    public void solve() {
-        this.solved = true;
-    }
-
-    public void unsolve() {
-        this.solved = false;
-    }
-
     public boolean isSolved() {
         return solved;
+    }
+
+    public void setSolved(boolean solved) {
+        this.solved = solved;
     }
 }
