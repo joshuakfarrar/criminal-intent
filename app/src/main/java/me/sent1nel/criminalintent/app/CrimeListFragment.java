@@ -7,12 +7,10 @@ import android.os.Bundle;
 import android.support.v4.app.ListFragment;
 import android.text.format.DateFormat;
 import android.view.*;
-import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
-import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
+import butterknife.OnClick;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -23,6 +21,9 @@ public class CrimeListFragment extends ListFragment {
     private ArrayList<Crime> crimes;
 
     private boolean subtitleIsShowing;
+
+    @InjectView(R.id.new_crime)
+    Button newCrimeButton;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,13 +43,15 @@ public class CrimeListFragment extends ListFragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View v = super.onCreateView(inflater, container, savedInstanceState);
+        View v = inflater.inflate(R.layout.crime_list_fragment, null);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             if (subtitleIsShowing) {
                 getActivity().getActionBar().setSubtitle(R.string.subtitle);
             }
         }
+
+        ButterKnife.inject(this, v);
 
         return v;
     }
@@ -84,11 +87,7 @@ public class CrimeListFragment extends ListFragment {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_item_new_crime:
-                Crime crime = new Crime();
-                CrimeLab.get(getActivity()).addCrime(crime);
-                Intent i = new Intent(getActivity(), CrimePagerActivity.class);
-                i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-                startActivityForResult(i, 0);
+                createNewCrime();
                 return true;
             case R.id.menu_item_show_subtitle:
                 if (getActivity().getActionBar().getSubtitle() == null) {
@@ -104,6 +103,18 @@ public class CrimeListFragment extends ListFragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    private void createNewCrime() {
+        Crime crime = new Crime();
+        CrimeLab.get(getActivity()).addCrime(crime);
+        Intent i = new Intent(getActivity(), CrimePagerActivity.class);
+        i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
+        startActivityForResult(i, 0);
+    }
+
+    @OnClick(R.id.new_crime) void onClick() {
+        createNewCrime();
     }
 
     public class CrimeAdapter extends ArrayAdapter<Crime> {
