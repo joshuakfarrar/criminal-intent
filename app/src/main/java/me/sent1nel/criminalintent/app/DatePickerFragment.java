@@ -31,15 +31,10 @@ public class DatePickerFragment extends DialogFragment {
 
     private Date date;
 
-    @InjectView(R.id.date_picker_dialog_datePicker)
-    DatePicker calendar;
-
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         View view = getActivity().getLayoutInflater()
                 .inflate(R.layout.date_picker_dialog, null);
-
-        ButterKnife.inject(this, view);
 
         date = (Date) getArguments().getSerializable(EXTRA_DATE);
 
