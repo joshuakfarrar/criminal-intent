@@ -1,6 +1,5 @@
 package me.sent1nel.criminalintent.app;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,6 +14,8 @@ import butterknife.OnClick;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
+
+import static android.widget.AdapterView.*;
 
 public class CrimeListFragment extends ListFragment {
 
@@ -53,6 +54,9 @@ public class CrimeListFragment extends ListFragment {
 
         ButterKnife.inject(this, v);
 
+        ListView listView = (ListView)v.findViewById(android.R.id.list);
+        registerForContextMenu(listView);
+
         return v;
     }
 
@@ -74,7 +78,7 @@ public class CrimeListFragment extends ListFragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
-        inflater.inflate(R.menu.fragment_crime_list, menu);
+        inflater.inflate(R.menu.crime_list_fragment, menu);
         MenuItem showSubtitle = menu.findItem(R.id.menu_item_show_subtitle);
         if (subtitleIsShowing && showSubtitle != null) {
             showSubtitle.setTitle(R.string.hide_subtitle);
@@ -82,7 +86,6 @@ public class CrimeListFragment extends ListFragment {
 
     }
 
-    @TargetApi(11)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -103,6 +106,28 @@ public class CrimeListFragment extends ListFragment {
             default:
                 return super.onOptionsItemSelected(item);
         }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        getActivity().getMenuInflater().inflate(R.menu.crime_list_item_context, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterContextMenuInfo info = (AdapterContextMenuInfo) item.getMenuInfo();
+        int position = info.position;
+        CrimeAdapter adapter = (CrimeAdapter) getListAdapter();
+        Crime crime = adapter.getItem(position);
+
+        switch (item.getItemId()) {
+            case R.id.menu_item_delete_crime:
+                CrimeLab.get(getActivity()).deleteCrime(crime);
+                adapter.notifyDataSetChanged();
+                return true;
+        }
+        return super.onContextItemSelected(item);
     }
 
     private void createNewCrime() {
