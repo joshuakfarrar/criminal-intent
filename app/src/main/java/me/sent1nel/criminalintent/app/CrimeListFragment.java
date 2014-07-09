@@ -54,8 +54,55 @@ public class CrimeListFragment extends ListFragment {
 
         ButterKnife.inject(this, v);
 
-        ListView listView = (ListView)v.findViewById(android.R.id.list);
-        registerForContextMenu(listView);
+        ListView listView = (ListView) v.findViewById(android.R.id.list);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.HONEYCOMB) {
+            // Use floating context menus on Froyo and Gingerbread
+            registerForContextMenu(listView);
+        } else {
+            // Use contextual action bar on Honeycomb and higher
+            listView.setChoiceMode(ListView.CHOICE_MODE_MULTIPLE_MODAL);
+            listView.setMultiChoiceModeListener(new AbsListView.MultiChoiceModeListener() {
+                public void onItemCheckedStateChanged(ActionMode mode, int position, long id, boolean checked) {
+                    // Required, but not used in this implementation
+                }
+
+                // ActionMode.Callback methods
+                public boolean onCreateActionMode(ActionMode mode, Menu menu) {
+                    MenuInflater inflater = mode.getMenuInflater();
+                    inflater.inflate(R.menu.crime_list_item_context, menu);
+                    return true;
+                }
+
+                public boolean onPrepareActionMode(ActionMode mode, Menu menu) {
+                    // Required, but not used in this implementation
+                    return false;
+                }
+
+                public boolean onActionItemClicked(ActionMode mode, MenuItem item) {
+                    switch (item.getItemId()) {
+                        case R.id.menu_item_delete_crime:
+                            CrimeAdapter adapter = (CrimeAdapter) getListAdapter();
+                            CrimeLab crimeLab = CrimeLab.get(getActivity());
+                            for (int i = adapter.getCount() - 1; i >= 0; i--) {
+                                if (getListView().isItemChecked(i)) {
+                                    crimeLab.deleteCrime(adapter.getItem(i));
+                                }
+                            }
+                            mode.finish();
+                            adapter.notifyDataSetChanged();
+                            return true;
+                        default:
+                            return false;
+                    }
+                }
+
+                public void onDestroyActionMode(ActionMode mode) {
+                    // Required, but not used in this implementation
+                }
+            });
+
+        }
+
 
         return v;
     }
@@ -138,7 +185,8 @@ public class CrimeListFragment extends ListFragment {
         startActivityForResult(i, 0);
     }
 
-    @OnClick(R.id.new_crime) void onClick() {
+    @OnClick(R.id.new_crime)
+    void onClick() {
         createNewCrime();
     }
 
