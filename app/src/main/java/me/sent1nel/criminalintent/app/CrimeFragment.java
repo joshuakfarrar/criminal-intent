@@ -3,8 +3,11 @@ package me.sent1nel.criminalintent.app;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.NavUtils;
@@ -26,7 +29,9 @@ public class CrimeFragment extends Fragment {
 
     public static final String EXTRA_CRIME_ID = "crime_id";
     private static final String DIALOG_DATE = "date";
+
     private static final int REQUEST_DATE = 0;
+    private static final int REQUEST_CONTACT = 1;
 
 
     @InjectView(R.id.crime_title)
@@ -35,6 +40,10 @@ public class CrimeFragment extends Fragment {
     Button crimeDateButton;
     @InjectView(R.id.crime_solved)
     CheckBox crimeSolved;
+    @InjectView(R.id.crime_suspectButton)
+    Button suspectButton;
+    @InjectView(R.id.crime_reportButton)
+    Button reportButton;
 
     private Crime crime;
 
@@ -72,6 +81,10 @@ public class CrimeFragment extends Fragment {
         updateDate();
         crimeSolved.setChecked(crime.isSolved());
 
+        if (crime.getSuspect() != null) {
+            suspectButton.setText(crime.getSuspect());
+        }
+
         return rootView;
     }
 
@@ -96,6 +109,31 @@ public class CrimeFragment extends Fragment {
             crime.setDate(date);
             updateDate();
         }
+        if (requestCode == REQUEST_CONTACT) {
+            Uri contactUri = data.getData();
+            // Specify which fields you want your query to return
+            // values for.
+            String[] queryFields = new String[] {
+                    ContactsContract.Contacts.DISPLAY_NAME
+            };
+            // Perform your query - the contactUri is like a "where"
+            // clause here
+            Cursor c = getActivity().getContentResolver()
+                    .query(contactUri, queryFields, null, null, null);
+            // Double-check that you actually got results
+            if (c.getCount() == 0) {
+                c.close();
+                return;
+            }
+            // Pull out the first column of the first row of data -
+            // that is your suspect's name.
+            c.moveToFirst();
+            String suspect = c.getString(0);
+            crime.setSuspect(suspect);
+            suspectButton.setText(suspect);
+            c.close();
+
+        }
     }
 
     @Override
@@ -117,6 +155,25 @@ public class CrimeFragment extends Fragment {
         return dateFormat.format(date);
     }
 
+    private String getCrimeReport() {
+        String solvedString = null;
+        if (crime.isSolved()) {
+            solvedString = getString(R.string.crime_report_solved);
+        } else {
+            solvedString = getString(R.string.crime_report_unsolved);
+        }
+        String dateFormat = "EEE, MMM dd";
+        String dateString = DateFormat.format(dateFormat, crime.getDate()).toString();
+
+        String suspect = crime.getSuspect();
+        if (suspect == null) {
+            suspect = getString(R.string.crime_report_no_suspect);
+        } else {
+            suspect = getString(R.string.crime_report_suspect, suspect);
+        }
+        return getString(R.string.crime_report, crime.getTitle(), dateString, solvedString, suspect);
+    }
+
     @OnTextChanged(R.id.crime_title)
     void onTextChanged(CharSequence text) {
         crime.setTitle(text.toString());
@@ -133,5 +190,22 @@ public class CrimeFragment extends Fragment {
         DatePickerFragment dialog = DatePickerFragment.newInstance(crime.getDate());
         dialog.setTargetFragment(CrimeFragment.this, REQUEST_DATE);
         dialog.show(fragmentManager, DIALOG_DATE);
+    }
+
+    @OnClick(R.id.crime_suspectButton) void selectSuspect() {
+        Intent i = new Intent(Intent.ACTION_PICK,
+                ContactsContract.Contacts.CONTENT_URI);
+        startActivityForResult(i, REQUEST_CONTACT);
+    }
+
+    @OnClick(R.id.crime_reportButton) void sendReport() {
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("text/plain");
+        i.putExtra(Intent.EXTRA_TEXT, getCrimeReport());
+        i.putExtra(Intent.EXTRA_SUBJECT,
+                getString(R.string.crime_report_subject));
+
+        i = Intent.createChooser(i, getString(R.string.send_report));
+        startActivity(i);
     }
 }

@@ -35,5 +35,4 @@
               android:paddingTop="4dp"
               android:text="Crime Date"/>
 
-
 </RelativeLayout>
