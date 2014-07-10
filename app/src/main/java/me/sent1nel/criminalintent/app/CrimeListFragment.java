@@ -1,5 +1,6 @@
 package me.sent1nel.criminalintent.app;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -22,6 +23,31 @@ public class CrimeListFragment extends ListFragment {
     private ArrayList<Crime> crimes;
 
     private boolean subtitleIsShowing;
+
+    private Callbacks callbacks;
+
+    /**
+     * Required interface for hosting activities.
+     */
+    public interface Callbacks {
+        void onCrimeSelected(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        callbacks = (Callbacks) activity;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callbacks = null;
+    }
+
+    public void updateUI() {
+        ((CrimeAdapter) getListAdapter()).notifyDataSetChanged();
+    }
 
     @InjectView(R.id.new_crime)
     Button newCrimeButton;
@@ -110,10 +136,7 @@ public class CrimeListFragment extends ListFragment {
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         Crime crime = ((CrimeAdapter) getListAdapter()).getItem(position);
-
-        Intent intent = new Intent(getActivity(), CrimePagerActivity.class);
-        intent.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-        startActivity(intent);
+        callbacks.onCrimeSelected(crime);
     }
 
     @Override
@@ -180,9 +203,8 @@ public class CrimeListFragment extends ListFragment {
     private void createNewCrime() {
         Crime crime = new Crime();
         CrimeLab.get(getActivity()).addCrime(crime);
-        Intent i = new Intent(getActivity(), CrimePagerActivity.class);
-        i.putExtra(CrimeFragment.EXTRA_CRIME_ID, crime.getId());
-        startActivityForResult(i, 0);
+        ((CrimeAdapter) getListAdapter()).notifyDataSetChanged();
+        callbacks.onCrimeSelected(crime);
     }
 
     @OnClick(R.id.new_crime)

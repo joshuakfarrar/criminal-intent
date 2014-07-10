@@ -47,6 +47,23 @@ public class CrimeFragment extends Fragment {
 
     private Crime crime;
 
+    private Callbacks callbacks;
+
+    public interface Callbacks {
+        void onCrimeUpdated(Crime crime);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        callbacks = (Callbacks)activity;
+    }
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        callbacks = null;
+    }
+
     public static Fragment newInstance(UUID crimeId) {
         Bundle args = new Bundle();
         args.putSerializable(EXTRA_CRIME_ID, crimeId);
@@ -107,6 +124,7 @@ public class CrimeFragment extends Fragment {
         if (requestCode == REQUEST_DATE) {
             Date date = (Date) data.getSerializableExtra(DatePickerFragment.EXTRA_DATE);
             crime.setDate(date);
+            callbacks.onCrimeUpdated(crime);
             updateDate();
         }
         if (requestCode == REQUEST_CONTACT) {
@@ -130,6 +148,7 @@ public class CrimeFragment extends Fragment {
             c.moveToFirst();
             String suspect = c.getString(0);
             crime.setSuspect(suspect);
+            callbacks.onCrimeUpdated(crime);
             suspectButton.setText(suspect);
             c.close();
 
@@ -177,11 +196,13 @@ public class CrimeFragment extends Fragment {
     @OnTextChanged(R.id.crime_title)
     void onTextChanged(CharSequence text) {
         crime.setTitle(text.toString());
+        callbacks.onCrimeUpdated(crime);
     }
 
     @OnCheckedChanged(R.id.crime_solved)
     void onChecked(boolean checked) {
         crime.setSolved(checked);
+        callbacks.onCrimeUpdated(crime);
     }
 
     @OnClick(R.id.crime_date)

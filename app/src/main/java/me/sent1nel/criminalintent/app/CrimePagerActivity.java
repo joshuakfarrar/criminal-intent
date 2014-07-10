@@ -13,7 +13,7 @@ import butterknife.OnPageChange;
 import java.util.ArrayList;
 import java.util.UUID;
 
-public class CrimePagerActivity extends FragmentActivity {
+public class CrimePagerActivity extends FragmentActivity implements CrimeFragment.Callbacks {
     @InjectView(R.id.view_pager)
     public ViewPager viewPager;
 
@@ -57,5 +57,10 @@ public class CrimePagerActivity extends FragmentActivity {
         Crime crime = crimes.get(position);
         if (crime.getTitle() != null)
             setTitle(crime.getTitle());
+    }
+
+    @Override
+    public void onCrimeUpdated(Crime crime) {
+        // required, but not used in single fragment mode
     }
 }
